@@ -216,6 +216,13 @@ Namenode: ```http://master:9870```
 
 ResourceManager: ```http://master:8088```
 
+### Cara Stop hadoop 
+Run satu satu
+```
+stop-dfs.sh
+stop-yarn.sh
+```
+
 # Cara cek hadoop udah jalan di komputer lain
 login ke user hadoop trus run jps
 ```
