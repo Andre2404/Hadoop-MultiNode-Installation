@@ -64,6 +64,10 @@ su - hadoop
 ```
 wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
 ```
+Ekstrak hadoop
+```
+tar -xzvf hadoop-3.3.6.tar.gz
+```
 Ubah nama dan lokasi folder hadoop 
 ```
 mv hadoop-3.3.6 ~/hadoop
@@ -87,6 +91,20 @@ source ~/.bashrc
 ```
 
 ## Konfigurasi di komputer master
+
+### Setup SSH
+Generate SSH, run satu satu
+```
+ssh-keygen -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 0600 ~/.ssh/authorized_keys
+```
+Copy SSH key ke semua node
+```
+ssh-copy-id hadoop@master
+ssh-copy-id hadoop@slave1
+ssh-copy-id hadoop@slave2
+```
 
 ### Konfigurasi di file bernama hadoop-env.sh, core-site.xml, hdfs-site.xml, mapred-site.xml, yarn-site.xml
 
