@@ -26,6 +26,13 @@ sudo nano /etc/hostname
 ```
 ubah isi file setiap komputernya sesuai role (master/slave123)
 
+Setelah diubah setiap nama hostnamenya, reboot/restart PC nya
+
+Bisa pake command
+```
+sudo reboot
+```
+
 ### Cek IP duls
 ```
 ip a
@@ -35,7 +42,7 @@ Contoh
 192.168.1.11 slave1
 192.168.1.12 slave2
 
-### buka file hosts pake command ini
+### Buka file hosts pake command ini
 ```
 sudo nano /etc/hosts
 ```
