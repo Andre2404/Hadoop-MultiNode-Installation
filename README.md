@@ -1,196 +1,225 @@
-# Hadoop-MultiNode-Installation
+# Hadoop 3.3.6 Multi Node Cluster Installation on Ubuntu
 
-**Install SSH, PDSH, Java**
-```
-sudo install ssh
-sudo install pdsh
-sudo apt install openjdk-8-jdk
-```
+## Konfigurasi di Semua Node/Komputer
 
-**Modif file .bashrc**
+### Jalankan 4 command berikut
 ```
-nano .bashrc
+sudo apt update && sudo apt upgrade -y
+sudo apt install openjdk-11-jdk
+sudo apt install ssh
+sudo apt install pdsh
 ```
-copy paste teks dan simpan paling bawah file
+### cek versi JDK
 ```
-export PDSH_RCMD_TYPE=ssh
+java -version
 ```
-*note
-ctrl + o trus enter = save file
-ctrl + x = keluar file
-
-**Konfigurasi SSH**
+### Buat user hadoop
 ```
-ssh-keygen -t rsa -P ""
-```
-enter enter aja
-
-**Copy public key**
-```
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-```
-pilih yes
-
-**Verifikasi SSH**
-```
-ssh localhost
+sudo adduser hadoop
+sudo usermod -aG sudo hadoop
 ```
 
-**Install Hadoop 3.3.6**
-```
-wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
-```
-
-**Ekstrak Hadoop trus ganti nama**
-```
-tar -xvzf hadoop-3.3.6.tar.gz
-
-mv hadoop-3.3.6 hadoop
-```
-
-**Konfigurasi file hadoop-env.sh**
-```
-nano ~/hadoop/etc/hadoop/hadoop-env.sh
-```
-copas trus taro paling bawah file
-```
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
-```
-
-**Pindahin directory hadoop**
-```
-sudo mv hadoop /usr/local/hadoop
-```
-
-**Konfigurasi file environment**
-```
-sudo nano /etc/environment
-```
-hapus patsh trus copas path ini
-```
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/hadoop/bin:/usr/local/hadoop/sbin"
-
-JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64/jre"
-```
-
-**Tambah user baru**
-```
-sudo adduser hadoopuser
-```
-trus run command dibawah ini satu satu
-```
-sudo usermod -aG hadoopuser hadoopuser
-sudo chown hadoopuser:root -R /usr/local/hadoop/
-sudo chmod g+rwx -R /usr/local/hadoop/
-sudo adduser hadoopuser sudo
-```
-
-**Cek IP**
-```
-ip a
-```
-catet ip nya
-misal :
-master = 192.168.205.7
-ip slave nya tinggal tambah 1 angka belakangnya
-192.168.205.8
-192.168.205.9
-
-**Konfigurasi file hosts**
-```
-sudo nano /etc/hosts
-```
-masukin alamat IP master sama slavenya
-contoh : 
-192.168.205.7 hadoop-master
-192.168.205.8 hadoop-slave1
-192.168.205.9 hadoop-slave2
-
-**Konfigurasi nama hostname**
+### Ubah hostname setiap komputernya
+buka file hostname
 ```
 sudo nano /etc/hostname
 ```
-contoh
-```
-untuk master
-hadoop-master
+ubah isi file setiap komputernya sesuai role (master/slave123)
 
-untuk slave
-hadoop-slave1
-hadoop-slave2
+### Cek IP duls
 ```
+ip a
+```
+Contoh
+192.168.1.10 di master maka ip di slavenya tinggal tambah 1 di ujung kanan nya
+192.168.1.11 slave1
+192.168.1.12 slave2
 
-**Restart semua komputer setelah disave**
+### buka file hosts pake command ini
 ```
-sudo reboot
+sudo nano /etc/hosts
 ```
-
-**Selesai Restart ganti user ke hadoopuser**
+Masukin ip dan hostname nya, misal
 ```
-su - hadoopuser
-```
-
-**Bikin ssh key baru di master aja**
-```
-ssh-keygen -t rsa
+192.168.1.10 master
+192.168.1.11 slave1
+192.168.1.12 slave2
 ```
 
-**Copy semua ssh key di master aja**
+### Buat user hadoop
 ```
-ssh-copy-id hadoopuser@hadoop-master
-ssh-copy-id hadoopuser@hadoop-slave1
-ssh-copy-id hadoopuser@hadoop-slave2
+sudo adduser hadoop
 ```
-yes trus masukin password
+masukin grup sudo
+```
+sudo usermod -aG sudo hadoop
+```
 
-**Konfigurasi core-site.xml di master aja**
+### Login ke user hadoop
 ```
-sudo nano /usr/local/hadoop/etc/hadoop/core-site.xml
+su - hadoop
 ```
-ganti configuration, copas
+
+### Install hadoop 3.3.6
+```
+wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+```
+Ubah nama dan lokasi folder hadoop 
+```
+mv hadoop-3.3.6 ~/hadoop
+```
+
+### Set environment variable nya
+Buka file .bashrc
+```
+sudo nano ~/.bashrc
+```
+Copas taro paling bawah file
+```
+export HADOOP_HOME=~/hadoop
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+```
+lalu run command
+```
+source ~/.bashrc
+```
+
+## Konfigurasi di komputer master
+
+### Konfigurasi di file bernama hadoop-env.sh, core-site.xml, hdfs-site.xml, mapred-site.xml, yarn-site.xml
+
+Buka file pake command ini, misal di file hadoop-env.sh
+```
+nano $HADOOP_CONF_DIR/hadoop-env.sh
+```
+
+Ini konfigurasi di setiap filenya
+
+**File hadoop-env.sh**
+```
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+```
+**File core-site.xml**
 ```
 <configuration>
-<property>
-<name>fs.defaultFS</name>
-<value>hdfs://hadoop-master:9000</value>
-</property>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://master:9000</value>
+  </property>
+</configuration>
+```
+**File hdfs-site.xml**
+```
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:///home/hadoop/hadoopdata/namenode</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:///home/hadoop/hadoopdata/datanode</value>
+  </property>
+</configuration>
+```
+**File mapred-site.xml**
+```
+<configuration>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
+</configuration>
+```
+**File yarn-site.xml**
+```
+<configuration>
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>master</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+  </property>
 </configuration>
 ```
 
-**Konfigurasi file hdfs-site.xml di master aja**
+### Konfigurasi workers
+Buka file
 ```
-sudo nano /usr/local/hadoop/etc/hadoop/hdfs-site.xml
+nano $HADOOP_CONF_DIR/workers
 ```
-ganti configuration, copas
+copas semua
 ```
-<configuration>
-<property>
-<name>dfs.namenode.name.dir</name><value>/usr/local/hadoop/data/nameNode</value>
-</property>
-<property>
-<name>dfs.datanode.data.dir</name><value>/usr/local/hadoop/data/dataNode</value>
-</property>
-<property>
-<name>dfs.replication</name>
-<value>2</value>
-</property>
-</configuration>
+slave1
+slave2
 ```
 
-**Konfigurasi worker/slave di master**
+### Copy konfigurasi yang tadi ke setiap slave
+Run command satu satu, disesuaikan dengan jumlah dan nama slavenya 
 ```
-sudo nano /usr/local/hadoop/etc/hadoop/workers
-```
-ganti semuanya, copas
-```
-hadoop-slave1
-hadoop-slave2
+scp -r ~/hadoop hadoop@slave1:~/
+scp -r ~/hadoop hadoop@slave2:~/
 ```
 
-**Copy konfigurasi di hadoop master ke slave**
+### Format Namenode
 ```
-scp /usr/local/hadoop/etc/hadoop/* hadoop-slave1:/usr/local/hadoop/etc/hadoop/
-scp /usr/local/hadoop/etc/hadoop/* hadoop-slave2:/usr/local/hadoop/etc/hadoop/
+hdfs namenode -format
 ```
 
-****
+### Start hadoop nya
+Run satu satu
+```
+start-dfs.sh
+start-yarn.sh
+```
+
+### Cek web UI hadoop nya
+pake hostname trus port nya
+
+http://hostname:port
+
+Misal
+
+Namenode: ```http://master:9870```
+
+ResourceManager: ```http://master:8088```
+
+# Cara cek hadoop udah jalan di komputer lain
+login ke user hadoop trus run jps
+```
+su - hadoop
+
+jps
+```
+kalo dah jalan muncul
+```
+DataNode
+NodeManager
+```
+
+# Cara upload dan lihat file dummy 200mb
+Buat folder di HDFS
+```
+hdfs dfs -mkdir /user
+hdfs dfs -mkdir /user/hadoop
+```
+Bikin file dummy 200mb
+```
+dd if=/dev/urandom of=sample_200mb.txt bs=1M count=200
+```
+Upload file ke HDFS
+```
+hdfs dfs -put sample_200mb.txt /user/hadoop/
+```
+Lihat apakah sudah terupload dan ada di folder
+```
+hdfs dfs -ls /user/hadoop/
+```
+
