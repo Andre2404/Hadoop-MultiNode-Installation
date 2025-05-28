@@ -13,11 +13,6 @@ sudo apt install pdsh
 ```
 java -version
 ```
-### Buat user hadoop
-```
-sudo adduser hadoop
-sudo usermod -aG sudo hadoop
-```
 
 ### Ubah hostname setiap komputernya
 buka file hostname
