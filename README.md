@@ -39,7 +39,9 @@ ip a
 ```
 Contoh
 192.168.1.10 di master maka ip di slavenya tinggal tambah 1 di ujung kanan nya
+
 192.168.1.11 slave1
+
 192.168.1.12 slave2
 
 ### Buka file hosts pake command ini
