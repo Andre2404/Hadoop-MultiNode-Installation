@@ -1,25 +1,29 @@
-# Hadoop 3.3.6 Multi Node Cluster Installation on Ubuntu
+# **Hadoop 3.3.6 Multi Node Cluster Installation on Ubuntu**
 
-## Konfigurasi di Semua Node/Komputer
-
-### Jalankan 4 command berikut
+## Jalankan 4 command berikut
 ```
 sudo apt update && sudo apt upgrade -y
-sudo apt install openjdk-11-jdk
-sudo apt install ssh
-sudo apt install pdsh
+sudo apt install openjdk-11-jdk ssh pdsh -y
 ```
-### cek versi JDK
+## cek versi JDK
 ```
 java -version
 ```
 
-### Ubah hostname setiap komputernya
+## Ubah hostname setiap komputernya
 buka file hostname
 ```
 sudo nano /etc/hostname
 ```
 ubah isi file setiap komputernya sesuai role (master/slave123)
+
+Contoh:
+
+master: master
+
+slave1: slave1
+
+slave2: slave2
 
 Setelah diubah setiap nama hostnamenya, reboot/restart PC nya
 
@@ -28,7 +32,7 @@ Bisa pake command
 sudo reboot
 ```
 
-### Cek IP duls
+## Cek IP duls
 ```
 ip a
 ```
@@ -39,7 +43,7 @@ Contoh
 
 192.168.1.12 slave2
 
-### Buka file hosts pake command ini
+## Buka file hosts pake command ini
 ```
 sudo nano /etc/hosts
 ```
@@ -50,21 +54,31 @@ Masukin ip dan hostname nya, misal
 192.168.1.12 slave2
 ```
 
-### Buat user hadoop
-```
-sudo adduser hadoop
-```
-masukin grup sudo
+## Masukin grup sudo
 ```
 sudo usermod -aG sudo hadoop
 ```
 
-### Login ke user hadoop
+## Login ke user hadoop
 ```
 su - hadoop
 ```
 
-### Install hadoop 3.3.6
+## Setup SSH
+Generate SSH, run satu satu
+```
+ssh-keygen -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 0600 ~/.ssh/authorized_keys
+```
+Copy SSH key ke semua node
+```
+ssh-copy-id hadoop@master
+ssh-copy-id hadoop@slave1
+ssh-copy-id hadoop@slave2
+```
+
+## Install hadoop 3.3.6
 ```
 wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
 ```
@@ -94,23 +108,7 @@ lalu run command
 source ~/.bashrc
 ```
 
-## Konfigurasi di komputer master
-
-### Setup SSH
-Generate SSH, run satu satu
-```
-ssh-keygen -t rsa -P ""
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-chmod 0600 ~/.ssh/authorized_keys
-```
-Copy SSH key ke semua node
-```
-ssh-copy-id hadoop@master
-ssh-copy-id hadoop@slave1
-ssh-copy-id hadoop@slave2
-```
-
-### Konfigurasi di file bernama hadoop-env.sh, core-site.xml, hdfs-site.xml, mapred-site.xml, yarn-site.xml
+## Konfigurasi di file bernama hadoop-env.sh, core-site.xml, hdfs-site.xml, mapred-site.xml, yarn-site.xml
 
 Buka file pake command ini, misal di file hadoop-env.sh
 ```
