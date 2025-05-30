@@ -1,8 +1,10 @@
 # **Hadoop 3.3.6 Multi Node Cluster Installation on Ubuntu**
 
-## Jalankan 4 command berikut
+
+
+## Jalankan command berikut
+Download JDK 11, SSH, PDSH
 ```
-sudo apt update && sudo apt upgrade -y
 sudo apt install openjdk-11-jdk ssh pdsh -y
 ```
 ## cek versi JDK
@@ -43,7 +45,7 @@ Contoh
 
 192.168.1.12 slave2
 
-## Buka file hosts pake command ini
+## Buka file hosts pake command ini (**HARUS ADA DI SEMUA KOMPUTER**)
 ```
 sudo nano /etc/hosts
 ```
@@ -56,12 +58,7 @@ Masukin ip dan hostname nya, misal
 
 ## Masukin grup sudo
 ```
-sudo usermod -aG sudo hadoop
-```
-
-## Login ke user hadoop
-```
-su - hadoop
+sudo usermod -aG sudo hduser
 ```
 
 ## Setup SSH
@@ -73,9 +70,9 @@ chmod 0600 ~/.ssh/authorized_keys
 ```
 Copy SSH key ke semua node
 ```
-ssh-copy-id hadoop@master
-ssh-copy-id hadoop@slave1
-ssh-copy-id hadoop@slave2
+ssh-copy-id hduser@master
+ssh-copy-id hduser@slave1
+ssh-copy-id hduser@slave2
 ```
 
 ## Install hadoop 3.3.6
@@ -139,11 +136,11 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
   </property>
   <property>
     <name>dfs.namenode.name.dir</name>
-    <value>file:///home/hadoop/hadoopdata/namenode</value>
+    <value>file:///home/hduser/hadoopdata/namenode</value>
   </property>
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value>file:///home/hadoop/hadoopdata/datanode</value>
+    <value>file:///home/hduser/hadoopdata/datanode</value>
   </property>
 </configuration>
 ```
@@ -184,8 +181,8 @@ slave2
 ### Copy konfigurasi yang tadi ke setiap slave
 Run command satu satu, disesuaikan dengan jumlah dan nama slavenya 
 ```
-scp -r ~/hadoop hadoop@slave1:~/
-scp -r ~/hadoop hadoop@slave2:~/
+scp -r ~/hadoop hduser@slave1:~/
+scp -r ~/hadoop hduser@slave2:~/
 ```
 
 ### Format Namenode
