@@ -1,6 +1,7 @@
 # **Hadoop 3.3.6 Multi Node Cluster Installation on Ubuntu**
 
-
+Buat yang pake VM (VirtualBox) setting network VM nya begini
+![Network Settings](https://github.com/Imam-Riyanto090/Hadoop-MultiNode-Installation/blob/main/SettingVM.jpg)
 
 ## Jalankan command berikut
 Download JDK 11, SSH, PDSH
