@@ -4,8 +4,9 @@ Buat yang pake VM (VirtualBox) setting network VM nya begini
 ![Network Settings](https://github.com/Imam-Riyanto090/Hadoop-MultiNode-Installation/blob/main/SettingVM.jpg)
 
 ## Jalankan command berikut
-Download JDK 11, SSH, PDSH
+Update dan Download JDK 11, SSH, PDSH
 ```
+sudo apt update && sudo apt upgrade -y
 sudo apt install openjdk-11-jdk ssh pdsh -y
 ```
 ## cek versi JDK
@@ -46,6 +47,7 @@ Contoh
 
 192.168.1.12 slave2
 
+
 ## Buka file hosts pake command ini (**HARUS ADA DI SEMUA KOMPUTER**)
 ```
 sudo nano /etc/hosts
@@ -60,33 +62,6 @@ Masukin ip dan hostname nya, misal
 ## Masukin grup sudo
 ```
 sudo usermod -aG sudo hduser
-```
-
-## Setup SSH
-Generate SSH, run satu satu
-```
-ssh-keygen -t rsa -P ""
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-chmod 0600 ~/.ssh/authorized_keys
-```
-Copy SSH key ke semua node
-```
-ssh-copy-id hduser@master
-ssh-copy-id hduser@slave1
-ssh-copy-id hduser@slave2
-```
-
-## Install hadoop 3.3.6
-```
-wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
-```
-Ekstrak hadoop
-```
-tar -xzvf hadoop-3.3.6.tar.gz
-```
-Ubah nama dan lokasi folder hadoop 
-```
-mv hadoop-3.3.6 ~/hadoop
 ```
 
 ### Set environment variable nya
@@ -104,6 +79,60 @@ export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 lalu run command
 ```
 source ~/.bashrc
+```
+
+## Setup SSH
+Generate SSH, run satu satu
+```
+ssh-keygen -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 0600 ~/.ssh/authorized_keys
+```
+Copy SSH key ke semua node
+```
+ssh-copy-id hduser@master
+ssh-copy-id hduser@slave1
+ssh-copy-id hduser@slave2
+```
+
+## Kirim JDK, SSH ke komputer slave
+```
+scp -r ~/openjdk-11-jdk hduser@slave1:~
+scp -r ~/openjdk-11-jdk hduser@slave2:~
+
+scp -r ~/.ssh hduser@slave1:~
+scp -r ~/.ssh hduser@slave2:~
+```
+
+## Salin konfigurasi hosts ke komputer slave
+karena butuh akses sudo maka nama file hosts nya kita ganti dulu ke hosts_temp
+```
+scp /etc/hosts hduser@slave1:~/hosts_temp
+scp /etc/hosts hduser@slave2:~/hosts_temp
+```
+
+Kemudian login ke setiap slave dan copy ke /etc dengan sudo
+```
+sudo mv ~/hosts_temp /etc/hosts'
+```
+
+## Salin konfigurasi hosts ke komputer slave
+```
+scp ~/.bashrc hduser@slave1:~/
+scp ~/.bashrc hduser@slave2:~/
+```
+
+## Install hadoop 3.3.6
+```
+wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+```
+Ekstrak hadoop
+```
+tar -xzvf hadoop-3.3.6.tar.gz
+```
+Ubah nama dan lokasi folder hadoop 
+```
+mv hadoop-3.3.6 ~/hadoop
 ```
 
 ## Konfigurasi di file bernama hadoop-env.sh, core-site.xml, hdfs-site.xml, mapred-site.xml, yarn-site.xml
@@ -219,8 +248,6 @@ stop-yarn.sh
 # Cara cek hadoop udah jalan di komputer lain
 login ke user hadoop trus run jps
 ```
-su - hadoop
-
 jps
 ```
 kalo dah jalan muncul
