@@ -11,6 +11,20 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install openjdk-11-jdk ssh pdsh -y
 ```
 
+## Setup SSH Key
+run satu satu
+```
+ssh-keygen -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+copy key ke semua slave
+```
+ssh-copy-id hduser@master
+ssh-copy-id hduser@slave1
+ssh-copy-id hduser@slave2
+```
+
 ## Ubah hostname setiap komputernya (**Jalankan di semua komputer**)
 buka file hostname
 ```
