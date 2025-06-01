@@ -33,20 +33,6 @@ Bisa pake command
 sudo reboot
 ```
 
-## Setup SSH Key 
-run satu satu
-```
-ssh-keygen -t rsa -P ""
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-```
-copy key ke semua slave
-```
-ssh-copy-id hduser@master
-ssh-copy-id hduser@slave1
-ssh-copy-id hduser@slave2
-```
-
 ## Konfigurasi File hosts
 cek IP dulss di **semua komputer**
 ```
@@ -61,6 +47,20 @@ Masukin ip dan hostname nya, misal
 192.168.1.10 master
 192.168.1.11 slave1
 192.168.1.12 slave2
+```
+
+## Setup SSH Key 
+run satu satu
+```
+ssh-keygen -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+copy key ke semua slave
+```
+ssh-copy-id hduser@master
+ssh-copy-id hduser@slave1
+ssh-copy-id hduser@slave2
 ```
 
 ## Salin konfigurasi hosts ke komputer slave
