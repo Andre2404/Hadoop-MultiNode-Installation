@@ -3,18 +3,15 @@
 Buat yang pake VM (VirtualBox) setting network VM nya begini
 ![Network Settings](https://github.com/Imam-Riyanto090/Hadoop-MultiNode-Installation/blob/main/SettingVM.jpg)
 
-## Jalankan command berikut
-Update dan Download JDK 11, SSH, PDSH
+kalo gaada perintah **Jalankan di semua komputer** berarti cuma di master aja
+
+## Update dan Download JDK 11, SSH, PDSH (**Jalankan di semua komputer**)
 ```
 sudo apt update && sudo apt upgrade -y
 sudo apt install openjdk-11-jdk ssh pdsh -y
 ```
-## cek versi JDK
-```
-java -version
-```
 
-## Ubah hostname setiap komputernya
+## Ubah hostname setiap komputernya (**Jalankan di semua komputer**)
 buka file hostname
 ```
 sudo nano /etc/hostname
@@ -36,19 +33,12 @@ Bisa pake command
 sudo reboot
 ```
 
-## Cek IP duls
+## Konfigurasi File hosts
+cek IP dulss di **semua komputer**
 ```
 ip a
 ```
-Contoh
-192.168.1.10 di master maka ip di slavenya tinggal tambah 1 di ujung kanan nya
-
-192.168.1.11 slave1
-
-192.168.1.12 slave2
-
-
-## Buka file hosts pake command ini (**HARUS ADA DI SEMUA KOMPUTER**)
+Catet IP nya, buka file hosts pake command ini di master aja
 ```
 sudo nano /etc/hosts
 ```
@@ -59,9 +49,16 @@ Masukin ip dan hostname nya, misal
 192.168.1.12 slave2
 ```
 
-## Masukin grup sudo
+## Salin konfigurasi hosts ke komputer slave
+karena butuh akses sudo maka nama file hosts nya kita ganti dulu ke hosts_temp
 ```
-sudo usermod -aG sudo hduser
+scp /etc/hosts hduser@slave1:~/hosts_temp
+scp /etc/hosts hduser@slave2:~/hosts_temp
+```
+
+Kemudian login ke setiap komputer slave dan copy ke lokasi /etc/hosts dengan sudo
+```
+sudo mv ~/hosts_temp /etc/hosts
 ```
 
 ### Set environment variable nya
@@ -81,42 +78,7 @@ lalu run command
 source ~/.bashrc
 ```
 
-## Setup SSH
-Generate SSH, run satu satu
-```
-ssh-keygen -t rsa -P ""
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-chmod 0600 ~/.ssh/authorized_keys
-```
-Copy SSH key ke semua node
-```
-ssh-copy-id hduser@master
-ssh-copy-id hduser@slave1
-ssh-copy-id hduser@slave2
-```
-
-## Kirim JDK, SSH ke komputer slave
-```
-scp -r ~/openjdk-11-jdk hduser@slave1:~
-scp -r ~/openjdk-11-jdk hduser@slave2:~
-
-scp -r ~/.ssh hduser@slave1:~
-scp -r ~/.ssh hduser@slave2:~
-```
-
-## Salin konfigurasi hosts ke komputer slave
-karena butuh akses sudo maka nama file hosts nya kita ganti dulu ke hosts_temp
-```
-scp /etc/hosts hduser@slave1:~/hosts_temp
-scp /etc/hosts hduser@slave2:~/hosts_temp
-```
-
-Kemudian login ke setiap slave dan copy ke /etc dengan sudo
-```
-sudo mv ~/hosts_temp /etc/hosts'
-```
-
-## Salin konfigurasi hosts ke komputer slave
+## Salin konfigurasi .bashrc ke komputer slave
 ```
 scp ~/.bashrc hduser@slave1:~/
 scp ~/.bashrc hduser@slave2:~/
@@ -197,7 +159,7 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 </configuration>
 ```
 
-### Konfigurasi workers
+## Konfigurasi workers
 Buka file
 ```
 nano $HADOOP_CONF_DIR/workers
@@ -208,26 +170,26 @@ slave1
 slave2
 ```
 
-### Copy konfigurasi yang tadi ke setiap slave
+## Copy konfigurasi yang tadi ke setiap slave
 Run command satu satu, disesuaikan dengan jumlah dan nama slavenya 
 ```
 scp -r ~/hadoop hduser@slave1:~/
 scp -r ~/hadoop hduser@slave2:~/
 ```
 
-### Format Namenode
+## Format Namenode
 ```
 hdfs namenode -format
 ```
 
-### Start hadoop nya
+## Start hadoop nya
 Run satu satu
 ```
 start-dfs.sh
 start-yarn.sh
 ```
 
-### Cek web UI hadoop nya
+## Cek web UI hadoop nya
 pake hostname trus port nya
 
 http://hostname:port
@@ -238,14 +200,14 @@ Namenode: ```http://master:9870```
 
 ResourceManager: ```http://master:8088```
 
-### Cara Stop hadoop 
+## Cara Stop hadoop 
 Run satu satu
 ```
 stop-dfs.sh
 stop-yarn.sh
 ```
 
-# Cara cek hadoop udah jalan di komputer lain
+## Cara cek hadoop udah jalan di komputer lain
 login ke user hadoop trus run jps
 ```
 jps
@@ -256,11 +218,10 @@ DataNode
 NodeManager
 ```
 
-# Cara upload dan lihat file dummy 200mb
+## Cara upload, download dan lihat file di HDFS
 Buat folder di HDFS
 ```
-hdfs dfs -mkdir /user
-hdfs dfs -mkdir /user/hadoop
+hdfs dfs -mkdir /user/hduser/input
 ```
 Bikin file dummy 200mb
 ```
@@ -268,10 +229,17 @@ dd if=/dev/urandom of=sample_200mb.txt bs=1M count=200
 ```
 Upload file ke HDFS
 ```
-hdfs dfs -put sample_200mb.txt /user/hadoop/
+hdfs dfs -put sample_200mb.txt /user/hduser/input/
 ```
 Lihat apakah sudah terupload dan ada di folder
 ```
-hdfs dfs -ls /user/hadoop/
+hdfs dfs -ls /user/hduser/input/
 ```
-
+lihat isi file
+```
+hdfs dfs -cat /user/hduser/input/sample_200mb.txt
+```
+Download file ke lokal
+```
+hdfs dfs -get /user/hduser/input/sample_200mb.txt
+```
