@@ -11,20 +11,6 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install openjdk-11-jdk ssh pdsh -y
 ```
 
-## Setup SSH Key
-run satu satu
-```
-ssh-keygen -t rsa -P ""
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-```
-copy key ke semua slave
-```
-ssh-copy-id hduser@master
-ssh-copy-id hduser@slave1
-ssh-copy-id hduser@slave2
-```
-
 ## Ubah hostname setiap komputernya (**Jalankan di semua komputer**)
 buka file hostname
 ```
@@ -45,6 +31,20 @@ Setelah diubah setiap nama hostnamenya, reboot/restart PC nya
 Bisa pake command
 ```
 sudo reboot
+```
+
+## Setup SSH Key 
+run satu satu
+```
+ssh-keygen -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+copy key ke semua slave
+```
+ssh-copy-id hduser@master
+ssh-copy-id hduser@slave1
+ssh-copy-id hduser@slave2
 ```
 
 ## Konfigurasi File hosts
@@ -69,10 +69,19 @@ karena butuh akses sudo maka nama file hosts nya kita ganti dulu ke hosts_temp
 scp /etc/hosts hduser@slave1:~/hosts_temp
 scp /etc/hosts hduser@slave2:~/hosts_temp
 ```
-
 Kemudian login ke setiap komputer slave dan copy ke lokasi /etc/hosts dengan sudo
+login ke setiap slave pake command
+```
+ssh slave1
+ssh slave2
+```
+trus ganti namanya pake command ini di setiap slave
 ```
 sudo mv ~/hosts_temp /etc/hosts
+```
+kalo udah logout pake command
+```
+exit
 ```
 
 ### Set environment variable nya
