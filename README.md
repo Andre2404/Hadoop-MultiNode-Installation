@@ -235,7 +235,12 @@ login ke user hadoop trus run jps
 ```
 jps
 ```
-kalo dah jalan muncul
+kalo dah jalan di master haru ada 
+```
+NameNode
+ResourceManager
+```
+di slave harus ada 
 ```
 DataNode
 NodeManager
